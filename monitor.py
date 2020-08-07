@@ -1,14 +1,12 @@
-from PyQt5.QtWidgets import QWidget, QGroupBox, QRadioButton, QPushButton, QHBoxLayout, QVBoxLayout, QApplication
+from PyQt5.QtWidgets import QWidget, QGroupBox, QRadioButton, QPushButton, QHBoxLayout, QVBoxLayout, QApplication, QMessageBox
 from PyQt5 import uic
 from PyQt5.QtGui import *
 import matplotlib.pyplot as plt
 import pandas as pd
-import sys, os
+import sys, os, settings
+from settings import *
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-
-MONITOR_INPUT_LIST = ["VFA", "Alk", "VFA/Alk", "Biogas Production", "Biogas Yield", "VSRem"]
-MONITOR_PLOT_LIST = ["예측", "추세"]
-raw_data = pd.read_csv('raw_data.csv')
+from data import getRawData
 
 
 
@@ -29,7 +27,7 @@ class MonitorWindow(QWidget):
         self.monitor_plots[1].setChecked(True)
         self.valueGroupBox = QGroupBox("출력 변수 선택")
         self.outputGroupBox = QGroupBox("출력 그래프 선택")
-        self.pushButton_monitor = QPushButton("출력")        
+        self.pushButton_monitor = QPushButton("출력")
 
         self.btnInputLayout = QHBoxLayout()
         for i in range(0, len(self.monitor_inputs)):
@@ -61,6 +59,7 @@ class MonitorWindow(QWidget):
 
         #모니터부분 피규어 출력 부분 설정
         
+        
     def setMonitor(self):
         input_name = self.getMonitorInput()
         plot_name = self.getMonitorPlot()
@@ -72,21 +71,18 @@ class MonitorWindow(QWidget):
     def getMonitorInput(self):
         for i in range(0, len(self.monitor_inputs)):
             if self.monitor_inputs[i].isChecked() :
-                print(self.monitor_inputs[i].text())
                 return self.monitor_inputs[i].text()
 
     def getMonitorPlot(self):
         for i in range(0, len(self.monitor_plots)):
             if self.monitor_plots[i].isChecked() :
-                print(self.monitor_plots[i].text())
                 return self.monitor_plots[i].text()
 
     def setMonitorEstimated(self, input_name):
-        global raw_data
-        print(raw_data.columns)
-        for i in range(0,len(MONITOR_INPUT_LIST)):
-            if raw_data.columns[i+2] == MONITOR_INPUT_LIST[i]:
-                print("Corretn")
+        raw_data = getRawData()
+        if len(raw_data) == 0:
+            self.warnRawData()
+            return
         ax = self.fig.add_subplot(1, 1, 1)
         ax.cla()
         ax.set_title(f"Raw data versus estimated trend, {input_name}")
@@ -97,12 +93,13 @@ class MonitorWindow(QWidget):
         ax.plot(x, f, '--r', linewidth = 1.5)
         ax.legend(["raw data", "estimated trend"], loc='upper left')
         ax.set_xlabel("Time(days)")
-        ax.set_ylabel(input_name)
-        
+        ax.set_ylabel(input_name)        
         ax.grid(True)
         self.canvas.draw()
 
     def setMonitorPredicted(self, input_name):
-        global raw_data
         pass
+
+    def warnRawData(self):
+        QMessageBox.warning(self, "Warning", "Raw data를 가져와야 합니다. Data탭에서 가져올 수 있습니다.")
             

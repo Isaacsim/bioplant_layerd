@@ -20,8 +20,3 @@ class ContactWindow(QWidget):
         for line in f:
             self.textbox_contact_1.append(line)
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    mywindow = ContactWindow()
-    mywindow.show()
-    app.exec_()

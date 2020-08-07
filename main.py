@@ -4,13 +4,9 @@ from PyQt5.QtCore import *
 from monitor import MonitorWindow
 from intro import IntroWindow
 from contact import ContactWindow
+from data import DataWindow
+from settings import *
 
-APP_NAME = "바이오플랜트"
-
-if os.path.exists('raw_data.csv'):
-    print(1)
-else:
-    print(2)
 
 class App(QMainWindow):
     def __init__(self):
@@ -26,7 +22,7 @@ class MainTapWidget(QWidget):
         super().__init__()
         tab_monitor = MonitorWindow()
         tab_analysis = QWidget()
-        tab_data = QWidget()
+        tab_data = DataWindow()
         tab_contact = ContactWindow()
         tabs = QTabWidget()
 

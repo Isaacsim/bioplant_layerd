@@ -1,6 +1,6 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QTabWidget, QVBoxLayout, QPushButton, QLabel, QFileDialog
-import intro
+import settings
 
 class IntroWindow(QWidget):
     def __init__(self):
@@ -23,7 +23,7 @@ class IntroWindow(QWidget):
 
     def pushButtonClicked(self):
         fname = QFileDialog.getOpenFileName(self)
-        self.label.setText(fname[1])
+        self.label.setText(fname[0])
         
 
 if __name__ == "__main__":
