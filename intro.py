@@ -23,7 +23,8 @@ class IntroWindow(QWidget):
 
     def pushButtonClicked(self):
         fname = QFileDialog.getOpenFileName(self)
-        self.label.setText(fname[0])
+        self.label.setText(fname[1])
+        
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

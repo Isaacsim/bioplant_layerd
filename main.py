@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QMainWindow, QWidget, QTabWidget, QApplication, QVBo
 from PyQt5.QtCore import *
 from monitor import MonitorWindow
 from intro import IntroWindow
+from contact import ContactWindow
 
 APP_NAME = "바이오플랜트"
 
@@ -26,7 +27,7 @@ class MainTapWidget(QWidget):
         tab_monitor = MonitorWindow()
         tab_analysis = QWidget()
         tab_data = QWidget()
-        tab_contact = QWidget()
+        tab_contact = ContactWindow()
         tabs = QTabWidget()
 
         tabs.addTab(tab_monitor, 'Monitor')

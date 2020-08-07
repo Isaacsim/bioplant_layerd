@@ -83,6 +83,10 @@ class MonitorWindow(QWidget):
 
     def setMonitorEstimated(self, input_name):
         global raw_data
+        print(raw_data.columns)
+        for i in range(0,len(MONITOR_INPUT_LIST)):
+            if raw_data.columns[i+2] == MONITOR_INPUT_LIST[i]:
+                print("Corretn")
         ax = self.fig.add_subplot(1, 1, 1)
         ax.cla()
         ax.set_title(f"Raw data versus estimated trend, {input_name}")
