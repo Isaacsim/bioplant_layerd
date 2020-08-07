@@ -1,10 +1,15 @@
-import sys
+import sys, os
 from PyQt5.QtWidgets import QMainWindow, QWidget, QTabWidget, QApplication, QVBoxLayout
 from PyQt5.QtCore import *
 from monitor import MonitorWindow
 from intro import IntroWindow
 
 APP_NAME = "바이오플랜트"
+
+if os.path.exists('raw_data.csv'):
+    print(1)
+else:
+    print(2)
 
 class App(QMainWindow):
     def __init__(self):
@@ -34,9 +39,6 @@ class MainTapWidget(QWidget):
 
         self.setLayout(vbox)
 
-        self.setWindowTitle('QTabWidget')
-        self.setGeometry(300, 300, 300, 200)
-        self.show()
        
 if __name__ == '__main__':
     app = QApplication(sys.argv)

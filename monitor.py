@@ -1,129 +1,104 @@
-import sys
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QWidget, QGroupBox, QRadioButton, QPushButton, QHBoxLayout, QVBoxLayout, QApplication
 from PyQt5 import uic
 from PyQt5.QtGui import *
 import matplotlib.pyplot as plt
 import pandas as pd
-import matplotlib as mpl
+import sys, os
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-import sys, os 
-def resource_path(relative_path):
-    if hasattr(sys, '_MEIPASS'):
-        return os.path.join(sys._MEIPASS, relative_path)
-    return os.path.join(os.path.abspath("."), relative_path)
 
+MONITOR_INPUT_LIST = ["VFA", "Alk", "VFA/Alk", "Biogas Production", "Biogas Yield", "VSRem"]
+MONITOR_PLOT_LIST = ["예측", "추세"]
+raw_data = pd.read_csv('raw_data.csv')
 
-monitor_input = 0
-monitor_input_list = ["VFA", "Alk", "VFA/Alk", "Biogas Production", "Biogas Yield", "VSRem"]
-monitor_plot = 1
-monitor_plot_list = ["예측", "추세"]
 
 
 
 class MonitorWindow(QWidget):
     def __init__(self):
         super().__init__()
-        self.initUI()
+        self.initUI()        
 
-    def initUI(self):    
+    def initUI(self):
+        self.monitor_inputs = []
+        for i in range(0, len(MONITOR_INPUT_LIST)):
+            self.monitor_inputs.append(QRadioButton(MONITOR_INPUT_LIST[i]))
+        self.monitor_plots = []
+        for i in range(0, len(MONITOR_PLOT_LIST)):
+            self.monitor_plots.append(QRadioButton(MONITOR_PLOT_LIST[i]))
+        self.monitor_inputs[0].setChecked(True)
+        self.monitor_plots[1].setChecked(True)
+        self.valueGroupBox = QGroupBox("출력 변수 선택")
+        self.outputGroupBox = QGroupBox("출력 그래프 선택")
+        self.pushButton_monitor = QPushButton("출력")        
 
-        valueGroupBox = QGroupBox("출력 변수 선택")
-        radioButton_monitor_bp = QRadioButton("Bio Production")
-        radioButton_monitor_by = QRadioButton("Biogas Yueld")
-        radioButton_monitor_vsr = QRadioButton("VSRem")
-        radioButton_monitor_vfa = QRadioButton("VFA")
-        radioButton_monitor_alk = QRadioButton("Alk")
-        radioButton_monitor_va = QRadioButton("VFA/Alk")
-        outputGroupBox = QGroupBox("출력 그래프 선택")
-        radioButton_monitor_prdct = QRadioButton("예측")
-        radioButton_monitor_rcnt = QRadioButton("추세")
-        pushButton_monitor_plot = QPushButton("출력")
+        self.btnInputLayout = QHBoxLayout()
+        for i in range(0, len(self.monitor_inputs)):
+            self.btnInputLayout.addWidget(self.monitor_inputs[i])
+        self.valueGroupBox.setLayout(self.btnInputLayout)
 
-        btnValueLayout = QHBoxLayout()
-        btnValueLayout.addWidget(radioButton_monitor_bp)
-        btnValueLayout.addWidget(radioButton_monitor_by)
-        btnValueLayout.addWidget(radioButton_monitor_vsr)
-        btnValueLayout.addWidget(radioButton_monitor_vfa)
-        btnValueLayout.addWidget(radioButton_monitor_alk)
-        btnValueLayout.addWidget(radioButton_monitor_va)
-        valueGroupBox.setLayout(btnValueLayout)
+        self.btnOutputLayout = QHBoxLayout()
+        for i in range(0, len(self.monitor_plots)):
+            self.btnOutputLayout.addWidget(self.monitor_plots[i])
+        self.outputGroupBox.setLayout(self.btnOutputLayout)        
 
-        btnOutputLayout = QHBoxLayout()
-        btnOutputLayout.addWidget(radioButton_monitor_prdct)
-        btnOutputLayout.addWidget(radioButton_monitor_rcnt)
-        outputGroupBox.setLayout(btnOutputLayout)
-        
+        self.inputLayout = QHBoxLayout()
+        self.inputLayout.addWidget(self.valueGroupBox)
+        self.inputLayout.addWidget(self.outputGroupBox)
+        self.inputLayout.addWidget(self.pushButton_monitor)
 
-        inputLayout = QHBoxLayout()
-        inputLayout.addWidget(valueGroupBox)
-        inputLayout.addWidget(outputGroupBox)
-        inputLayout.addWidget(pushButton_monitor_plot)
-
-        outputLayout = QHBoxLayout()       
+        self.outputLayout = QHBoxLayout()       
         self.fig = plt.Figure()
         self.canvas = FigureCanvas(self.fig)
-        outputLayout.addWidget(self.canvas)
+        self.outputLayout.addWidget(self.canvas)
      
-        layout = QVBoxLayout()
-        layout.addLayout(inputLayout)
-        layout.addLayout(outputLayout)
+        self.layout = QVBoxLayout()
+        self.layout.addLayout(self.inputLayout)
+        self.layout.addLayout(self.outputLayout)
      
-        self.setLayout(layout)               
+        self.setLayout(self.layout)
+      
+        self.pushButton_monitor.clicked.connect(self.setMonitor)
 
         #모니터부분 피규어 출력 부분 설정
         
+    def setMonitor(self):
+        input_name = self.getMonitorInput()
+        plot_name = self.getMonitorPlot()
+        if plot_name == "예측" :
+            self.setMonitorPredicted(input_name)
+        elif plot_name == "추세" :
+            self.setMonitorEstimated(input_name)
+            
+    def getMonitorInput(self):
+        for i in range(0, len(self.monitor_inputs)):
+            if self.monitor_inputs[i].isChecked() :
+                print(self.monitor_inputs[i].text())
+                return self.monitor_inputs[i].text()
 
+    def getMonitorPlot(self):
+        for i in range(0, len(self.monitor_plots)):
+            if self.monitor_plots[i].isChecked() :
+                print(self.monitor_plots[i].text())
+                return self.monitor_plots[i].text()
 
-    def setMonitorInput(self, state, button):
-        button_text = button.text()        
-        for i in range(0, len(monitor_input_list)) :
-            if monitor_input_list[i] == button_text:
-                global monitor_input
-                monitor_input = i
-                print(monitor_input)                
-        self.textEdit.setText(f"{str(button.text())} is selected")
-        print(monitor_input)
-
-    def setMonitorPlot(self, state, button):
-        button_text = button.text()        
-        for i in range(0, len(monitor_plot_list)) :
-            if monitor_plot_list[i] == button_text:
-                global monitor_plot
-                monitor_plot = i
-                print(monitor_plot)                
-        self.textEdit.setText(f"{str(button.text())} is selected")
-        print(monitor_plot)
-
-    def setMonitorEstimated(self):
-        raw_data = pd.read_csv(resource_path('raw_data.csv'))
+    def setMonitorEstimated(self, input_name):
+        global raw_data
         ax = self.fig.add_subplot(1, 1, 1)
         ax.cla()
-        ax.set_title(f"Raw data versus estimated trend, {monitor_input_list[monitor_input]}")
+        ax.set_title(f"Raw data versus estimated trend, {input_name}")
         x = raw_data["Time"]
-        y = raw_data[monitor_input_list[monitor_input]]
-        f = raw_data[monitor_input_list[monitor_input]].rolling(window=10, center=True).mean()
+        y = raw_data[input_name]
+        f = raw_data[input_name].rolling(window=10, center=True).mean()
         ax.plot(x, y, '-b', x, f, '--r', linewidth = 0.8)
         ax.plot(x, f, '--r', linewidth = 1.5)
         ax.legend(["raw data", "estimated trend"], loc='upper left')
         ax.set_xlabel("Time(days)")
-        ax.set_ylabel(monitor_input_list[monitor_input])
-
-
-        #if monitor_plot == 1:        
-           # rcnt_line = self.getRecentLine(raw_data)
-           # ax.plot(raw_data["Time"], rcnt_line)
-        #elif monitor_plot == 0:
-          #  self.textEdit.setText(f"예측 미지원")
-          #  pass            
+        ax.set_ylabel(input_name)
         
         ax.grid(True)
         self.canvas.draw()
 
-    def getRecentLine(self, raw_data):
-        return 
+    def setMonitorPredicted(self, input_name):
+        global raw_data
+        pass
             
-         
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    ex = MonitorWindow()
-    sys.exit(app.exec_())
