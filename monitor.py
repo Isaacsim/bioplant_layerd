@@ -1,4 +1,13 @@
-from PyQt5.QtWidgets import QWidget, QGroupBox, QRadioButton, QPushButton, QHBoxLayout, QVBoxLayout, QApplication, QMessageBox
+from PyQt5.QtWidgets import (
+    QWidget,
+    QGroupBox,
+    QRadioButton,
+    QPushButton,
+    QHBoxLayout,
+    QVBoxLayout,
+    QApplication,
+    QMessageBox,
+)
 from PyQt5 import uic
 from PyQt5.QtGui import *
 import matplotlib.pyplot as plt
@@ -9,12 +18,10 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from data import getRawData
 
 
-
-
 class MonitorWindow(QWidget):
     def __init__(self):
         super().__init__()
-        self.initUI()        
+        self.initUI()
 
     def initUI(self):
         self.monitor_inputs = []
@@ -37,45 +44,44 @@ class MonitorWindow(QWidget):
         self.btnOutputLayout = QHBoxLayout()
         for i in range(0, len(self.monitor_plots)):
             self.btnOutputLayout.addWidget(self.monitor_plots[i])
-        self.outputGroupBox.setLayout(self.btnOutputLayout)        
+        self.outputGroupBox.setLayout(self.btnOutputLayout)
 
         self.inputLayout = QHBoxLayout()
         self.inputLayout.addWidget(self.valueGroupBox)
         self.inputLayout.addWidget(self.outputGroupBox)
         self.inputLayout.addWidget(self.pushButton_monitor)
 
-        self.outputLayout = QHBoxLayout()       
+        self.outputLayout = QHBoxLayout()
         self.fig = plt.Figure()
         self.canvas = FigureCanvas(self.fig)
         self.outputLayout.addWidget(self.canvas)
-     
+
         self.layout = QVBoxLayout()
         self.layout.addLayout(self.inputLayout)
         self.layout.addLayout(self.outputLayout)
-     
+
         self.setLayout(self.layout)
-      
+
         self.pushButton_monitor.clicked.connect(self.setMonitor)
 
-        #모니터부분 피규어 출력 부분 설정
-        
-        
+        # 모니터부분 피규어 출력 부분 설정
+
     def setMonitor(self):
         input_name = self.getMonitorInput()
         plot_name = self.getMonitorPlot()
-        if plot_name == "예측" :
+        if plot_name == "예측":
             self.setMonitorPredicted(input_name)
-        elif plot_name == "추세" :
+        elif plot_name == "추세":
             self.setMonitorEstimated(input_name)
-            
+
     def getMonitorInput(self):
         for i in range(0, len(self.monitor_inputs)):
-            if self.monitor_inputs[i].isChecked() :
+            if self.monitor_inputs[i].isChecked():
                 return self.monitor_inputs[i].text()
 
     def getMonitorPlot(self):
         for i in range(0, len(self.monitor_plots)):
-            if self.monitor_plots[i].isChecked() :
+            if self.monitor_plots[i].isChecked():
                 return self.monitor_plots[i].text()
 
     def setMonitorEstimated(self, input_name):
@@ -89,11 +95,11 @@ class MonitorWindow(QWidget):
         x = raw_data["Time"]
         y = raw_data[input_name]
         f = raw_data[input_name].rolling(window=10, center=True).mean()
-        ax.plot(x, y, '-b', x, f, '--r', linewidth = 0.8)
-        ax.plot(x, f, '--r', linewidth = 1.5)
-        ax.legend(["raw data", "estimated trend"], loc='upper left')
+        ax.plot(x, y, "-b", x, f, "--r", linewidth=0.8)
+        ax.plot(x, f, "--r", linewidth=1.5)
+        ax.legend(["raw data", "estimated trend"], loc="upper left")
         ax.set_xlabel("Time(days)")
-        ax.set_ylabel(input_name)        
+        ax.set_ylabel(input_name)
         ax.grid(True)
         self.canvas.draw()
 
@@ -101,5 +107,4 @@ class MonitorWindow(QWidget):
         pass
 
     def warnRawData(self):
-        QMessageBox.warning(self, "Warning", "Raw data를 가져와야 합니다. Data탭에서 가져올 수 있습니다.")
-            
+        QMessageBox.warning(self, "Warning", "Raw data를 가져와야 합니다.")

@@ -16,7 +16,6 @@ class ContactWindow(QWidget):
         self.setLayout(layout)
 
     def getContactText(self):
-        f = open("contact.txt", mode='r', encoding="utf-8")
+        f = open("contact.txt", mode="r", encoding="utf-8")
         for line in f:
             self.textbox_contact_1.append(line)
-
