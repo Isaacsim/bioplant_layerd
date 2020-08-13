@@ -1,10 +1,10 @@
 import sys
 from PyQt5.QtWidgets import QMainWindow, QWidget, QTabWidget, QApplication, QVBoxLayout
-from PyQt5.QtCore import *
 from monitor import MonitorWindow
 from contact import ContactWindow
+from analysis import AnalysisWindow
 from data import DataWindow
-from settings import *
+from settings import APP_NAME
 
 
 class App(QMainWindow):
@@ -21,7 +21,7 @@ class MainTapWidget(QWidget):
     def __init__(self):
         super().__init__()
         tab_monitor = MonitorWindow()
-        tab_analysis = QWidget()
+        tab_analysis = AnalysisWindow()
         tab_data = DataWindow()
         tab_contact = ContactWindow()
         tabs = QTabWidget()

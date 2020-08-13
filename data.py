@@ -2,7 +2,8 @@ import sys, os
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 import pandas as pd
-from settings import *
+from settings import MONITOR_INPUT_LIST
+from pdtable import PdTable
 
 raw_data = []
 
@@ -54,12 +55,13 @@ class DataWindow(QWidget):
             if self.rawdataValidation(data) == True:
                 global raw_data
                 raw_data = data
+                self.setDataTalble(raw_data)
 
     def importFromPath(self):
         fname = QFileDialog.getOpenFileName(self)
         if fname[0].endswith(".csv") == False:
             self.rawdata_label_2.setText(
-                "CSV 확장자 파일dcsccsdscsdcdsscdcsdcsdcsdcsd만 가져올 수 있습니다."
+                "CSV 확장자 파일만 가져올 수 있습니다."
             )
             self.rawdata_vali = False
             return
@@ -67,6 +69,7 @@ class DataWindow(QWidget):
         if self.rawdataValidation(data) == True:
             global raw_data
             raw_data = data
+            self.setDataTalble(raw_data)
 
     def exportRawdata(self):
         global raw_data
@@ -78,7 +81,8 @@ class DataWindow(QWidget):
         self.rawdata_label_2.setText("raw_data_exported.csv로 저장하였습니다.")
 
     def appendRawdata(self):
-        if self.rawdata_vali is False:
+        global raw_data
+        if len(raw_data) == 0:
             self.rawdata_label_2.setText("입력할 데이터 목록이 없습니다.")
         pass
 
@@ -86,12 +90,15 @@ class DataWindow(QWidget):
         for i in range(0, len(MONITOR_INPUT_LIST)):
             if data.columns[i + 2] != MONITOR_INPUT_LIST[i]:
                 self.rawdata_label_2.setText(
-                    "csv 파일의 범주가 맞지 않습니다. 지정된 범례로 구성된 데이터인지 확인하십시오."
+                    "csv 파일의 범주가 맞지 않습니다."
                 )
                 return False
         self.rawdata_label_2.setText("가져오기 성공")
         return True
 
+    def setDataTalble(self, raw_data):
+        model = PdTable(raw_data)
+        self.rawdata_table_1.setModel(model)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
