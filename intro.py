@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import (
     QLabel,
     QFileDialog,
 )
+
 import settings
 
 

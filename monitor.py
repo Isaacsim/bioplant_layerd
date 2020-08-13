@@ -16,6 +16,7 @@ import sys, os, settings
 from settings import *
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from data import getRawData
+from test import testPlot
 
 
 class MonitorWindow(QWidget):
@@ -104,7 +105,8 @@ class MonitorWindow(QWidget):
         self.canvas.draw()
 
     def setMonitorPredicted(self, input_name):
-        pass
+        testPlot(self.fig, input_name)
+        self.canvas.draw()
 
     def warnRawData(self):
         QMessageBox.warning(self, "Warning", "Raw data를 가져와야 합니다.")
