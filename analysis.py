@@ -13,6 +13,7 @@ from PyQt5.QtWidgets import (
     QTextBrowser,
 )
 from PyQt5.QtGui import *
+import numpy as np
 import matplotlib.pyplot as plt
 import sys, os, settings
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -51,7 +52,7 @@ class AnalysisWindow(QWidget):
 
         self.layout = QHBoxLayout()
         self.layout.addLayout(self.leftLayout, 3)
-        self.layout.addLayout(self.rightLayout, 1)        
+        self.layout.addLayout(self.rightLayout, 1)
         self.setLayout(self.layout)
 
         self.analysis_push_1.clicked.connect(self.setAnalysisGraph)
@@ -84,13 +85,13 @@ class AnalysisWindow(QWidget):
         if term == 0:
             x = raw_data
         else:
-            x = raw_data.iloc[len(raw_data)- term * 7:len(raw_data), :]        
+            x = raw_data.iloc[len(raw_data) - term * 7 : len(raw_data), :]
 
         a1 = self.fig.add_subplot(3, 1, 1)
         a1.cla()
         x1 = x["Time"]
         y1 = x["OLR"]
-        a1.plot(x1, y1, '-b', linewidth=0.8)
+        a1.plot(x1, y1, "-b", linewidth=0.8)
         a1.set_xlabel("Time(days)")
         a1.set_ylabel("OLR")
         plt.tight_layout(pad=0.5)
@@ -100,32 +101,38 @@ class AnalysisWindow(QWidget):
         a2.cla()
         x2 = x["Time"]
         y2 = x["Biogas Production"]
-        a2.plot(x2, y2, '-r', linewidth=0.8)
+        a2.plot(x2, y2, "-r", linewidth=0.8)
         a2.set_xlabel("Time(days)")
         a2.set_ylabel("Biogas Production")
         plt.tight_layout(pad=0.5)
         a2.grid(True)
-        
+
         a3 = self.fig.add_subplot(3, 1, 3)
         a3.cla()
         x3 = x["Time"]
         x_shift = x.shift(2)
         y3 = (x["OLR"] - x_shift["OLR"]) / x["OLR"] * 100
-        y4 = (x["Biogas Production"] - x_shift["Biogas Production"]) / x["Biogas Production"] * 100
-        a3.bar(x3, y3, width=1.5, color='b')
-        a3.bar(x3, y4, color='r')
+        y4 = (
+            (x["Biogas Production"] - x_shift["Biogas Production"])
+            / x["Biogas Production"]
+            * 100
+        )
+        a3.fill_between(x3, 0, y3, color="b", alpha=0.4)
+        a3.fill_between(x3, 0, y4, color="r", alpha=0.4)
         a3.set_xlabel("Time(days)")
         a3.set_ylabel("OLR / BP Ratio")
-        a3.legend(["OLR", "Biogas Production"], loc='lower left')
+        a3.legend(["OLR", "Biogas Production"], loc="lower left")
         a3.grid(True)
-        
+
         self.canvas.draw()
-        
-        error = round(abs(y3 - y4).mean(),2)
+
+        error = round(abs(y3 - y4).mean(), 2)
         total_input_mean = round(raw_data["OLR"].mean(), 2)
-        total_output_mean = round(raw_data["Biogas Production"].mean(),2)
+        total_output_mean = round(raw_data["Biogas Production"].mean(), 2)
         input_ratio = round(float(x["OLR"].mean()) / total_input_mean * 100, 2)
-        output_ratio = round(float(x["Biogas Production"].mean()) / total_output_mean * 100, 2)
+        output_ratio = round(
+            float(x["Biogas Production"].mean()) / total_output_mean * 100, 2
+        )
 
         info_text = f"입력대비 출력 상관도 : {100-error}%\n입력 대비 출력 오차율 (일별) : {error}%\n전체 데이터 평균 OLR 부하량 : {total_input_mean} kg VS/m3\n전체 데이터 평균 Biogas 출하량 : {total_output_mean} Nm3/kg Vsadd\n평균대비 최근 OLR 부하량 비율 : {input_ratio}%\n평균대비 최근 BP 출하량 비율 : {output_ratio}%"
 
@@ -137,7 +144,7 @@ class AnalysisWindow(QWidget):
         if term == 0:
             x = raw_data.iloc[:, [1, 5]]
         else:
-            x = raw_data.iloc[len(raw_data) - term * 7:len(raw_data), [1, 5]]        
+            x = raw_data.iloc[len(raw_data) - term * 7 : len(raw_data), [1, 5]]
         model = PdTable(x)
         self.analysis_table_1.setModel(model)
 

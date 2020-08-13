@@ -16,7 +16,7 @@ import sys, os, settings
 from settings import *
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from data import getRawData
-from test import testPlot
+from predict import PredictWindow
 
 
 class MonitorWindow(QWidget):
@@ -92,12 +92,14 @@ class MonitorWindow(QWidget):
             return
         ax = self.fig.add_subplot(1, 1, 1)
         ax.cla()
-        ax.set_title(f"Raw data versus estimated trend, {input_name}")
+
         x = raw_data["Time"]
         y = raw_data[input_name]
         f = raw_data[input_name].rolling(window=10, center=True).mean()
         ax.plot(x, y, "-b", x, f, "--r", linewidth=0.8)
         ax.plot(x, f, "--r", linewidth=1.5)
+
+        ax.set_title(f"Raw data versus estimated trend, {input_name}")
         ax.legend(["raw data", "estimated trend"], loc="upper left")
         ax.set_xlabel("Time(days)")
         ax.set_ylabel(input_name)
@@ -105,7 +107,11 @@ class MonitorWindow(QWidget):
         self.canvas.draw()
 
     def setMonitorPredicted(self, input_name):
-        testPlot(self.fig, input_name)
+        raw_data = getRawData()
+        if len(raw_data) == 0:
+            self.warnRawData()
+            return
+        PredictWindow(self.fig, input_name, raw_data)
         self.canvas.draw()
 
     def warnRawData(self):
