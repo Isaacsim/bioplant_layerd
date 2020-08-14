@@ -30,7 +30,7 @@ class MainTapWidget(QWidget):
         tabs.addTab(tab_analysis, "Analysis")
         tabs.addTab(tab_data, "Data")
         tabs.addTab(tab_contact, "Contact")
-
+        
         vbox = QVBoxLayout()
         vbox.addWidget(tabs)
 

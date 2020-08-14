@@ -20,7 +20,6 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import sys, os, settings
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from data import getRawData
 from sklearn.linear_model import LinearRegression
 from settings import PREDICTED_RANGE, LEARNING_RANGE, ROLLING_RANGE, ROLLING_RATIO
 
@@ -56,8 +55,8 @@ def PredictWindow(canvas, input_name, raw_data):
     print(intercept, coef)
 
     xs = np.arange(
-        data_tailed_rolling.iloc[0, 0],
-        data_tailed_rolling.iloc[-1, 0] + PREDICTED_RANGE,
+        data_tailed.iloc[0, 0],
+        data_tailed.iloc[-1, 0] + PREDICTED_RANGE,
         1,
     )
     ys = (
@@ -68,18 +67,22 @@ def PredictWindow(canvas, input_name, raw_data):
     )
 
     ys_ci = (
-        0.2
+        0.05
         * ys ** 2
         / np.mean(ys)
         * np.sqrt(1 / n + (ys - np.mean(ys)) ** 2 / np.sum((ys - np.mean(ys)) ** 2))
     )
+    print(np.mean(ys))
+    for i in range(0, PREDICTED_RANGE):
+        ys_ci[-PREDICTED_RANGE + i] *= (1 + i)
+    print(ys_ci[-5:-1])
     a1.scatter(x="Time", y=input_name, color="b", data=data_tailed)
     a1.plot(xs, ys, lw=1, color="r")
     a1.fill_between(xs, ys - ys_ci, ys + ys_ci, color="r", alpha=0.1)
     a1.axvline(x=tail_data["Time"], color="black")
 
     a1.set_title(f"Raw data versus predicted value, {input_name}")
-    a1.legend(["predicted graph", "latest append date", "raw data"], loc="upper left")
+    a1.legend(["predicted graph", "latest append date", "raw data", "standard variation < 1"], loc="upper left")
     a1.set_xlabel("Time(days)")
     a1.set_ylabel(input_name)
     a1.grid(True)
