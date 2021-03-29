@@ -1,7 +1,5 @@
-import sys
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
 
+from PyQt5.QtWidgets import QWidget, QTextBrowser, QHBoxLayout
 
 class ContactWindow(QWidget):
     def __init__(self):
@@ -19,3 +17,4 @@ class ContactWindow(QWidget):
         f = open("contact.txt", mode="r", encoding="utf-8")
         for line in f:
             self.textbox_contact_1.append(line)
+

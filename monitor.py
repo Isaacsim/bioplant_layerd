@@ -5,14 +5,9 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QHBoxLayout,
     QVBoxLayout,
-    QApplication,
     QMessageBox,
 )
-from PyQt5 import uic
-from PyQt5.QtGui import *
 import matplotlib.pyplot as plt
-import pandas as pd
-import sys, os, settings
 from settings import *
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from data import getRawData
@@ -23,6 +18,7 @@ class MonitorWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
+
 
     def initUI(self):
         self.monitor_inputs = []
@@ -54,6 +50,7 @@ class MonitorWindow(QWidget):
 
         self.outputLayout = QHBoxLayout()
         self.fig = plt.Figure()
+        self.ax = self.fig.add_subplot(1, 1, 1)
         self.canvas = FigureCanvas(self.fig)
         self.outputLayout.addWidget(self.canvas)
 
@@ -90,29 +87,31 @@ class MonitorWindow(QWidget):
         if len(raw_data) == 0:
             self.warnRawData()
             return
-        ax = self.fig.add_subplot(1, 1, 1)
-        ax.cla()
 
+        self.ax.cla()
         x = raw_data["Time"]
         y = raw_data[input_name]
-        f = raw_data[input_name].rolling(window=10, center=True).mean()
-        ax.plot(x, y, "-b", x, f, "--r", linewidth=0.8)
-        ax.plot(x, f, "--r", linewidth=1.5)
+        f = raw_data[input_name].rolling(window=5, center=True).mean() #결함31
+        self.ax.plot(x, y, "-b", x, f, "--r", linewidth=0.8)
+        self.ax.plot(x, f, "--r", linewidth=1.5)
 
-        ax.set_title(f"Raw data versus estimated trend, {input_name}")
-        ax.legend(["raw data", "estimated trend"], loc="upper left")
-        ax.set_xlabel("Time(days)")
-        ax.set_ylabel(input_name)
-        ax.grid(True)
+        self.ax.set_title(f"Raw data versus estimated trend, {input_name}")
+        self.ax.legend(["raw data", "estimated trend"], loc="upper left")
+        self.ax.set_xlabel("Time(days)")
+        self.ax.set_ylabel(input_name)
+        self.ax.grid(True)
         self.canvas.draw()
+        print(f"{LOG_EXCUTE[8]} 파라미터 : {self.getMonitorInput()}")
 
     def setMonitorPredicted(self, input_name):
         raw_data = getRawData()
         if len(raw_data) == 0:
             self.warnRawData()
             return
-        PredictWindow(self.fig, input_name, raw_data)
+        PredictWindow(self.ax, input_name, raw_data)
         self.canvas.draw()
+        print(f"{LOG_EXCUTE[9]} 파라미터 : {self.getMonitorInput()}")
 
     def warnRawData(self):
+        print(LOG_ERROR[0])
         QMessageBox.warning(self, "Warning", "Raw data를 가져와야 합니다.")

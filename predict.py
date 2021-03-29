@@ -1,25 +1,5 @@
 import numpy as np
 import pandas as pd
-
-from PyQt5.QtWidgets import (
-    QWidget,
-    QGroupBox,
-    QRadioButton,
-    QPushButton,
-    QHBoxLayout,
-    QVBoxLayout,
-    QApplication,
-    QMessageBox,
-    QSpinBox,
-    QLabel,
-    QTableView,
-    QTextBrowser,
-)
-from PyQt5.QtGui import *
-import seaborn as sns
-import matplotlib.pyplot as plt
-import sys, os, settings
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from sklearn.linear_model import LinearRegression
 from settings import PREDICTED_RANGE, LEARNING_RANGE, ROLLING_RANGE, ROLLING_RATIO
 
@@ -27,21 +7,23 @@ from settings import PREDICTED_RANGE, LEARNING_RANGE, ROLLING_RANGE, ROLLING_RAT
 def PredictWindow(canvas, input_name, raw_data):
 
     data_tailed = raw_data.tail(LEARNING_RANGE)
-    a1 = canvas.add_subplot(1, 1, 1)
-    a1.cla()
+
+    canvas.cla()
 
     tail_data = data_tailed.iloc[-1]
     append_data = pd.DataFrame()
     append_data = append_data.append(tail_data)
+
+    #정확도 증가를 위한 padding과정
     for n in range(0, ROLLING_RANGE):
         tail = append_data.iloc[-1]
         tail["Time"] += ROLLING_RATIO
         append_data = append_data.append(tail)
 
-    data_tailed_rolling = data_tailed.append(append_data, sort=False)
-    print(data_tailed_rolling)
 
-    # a1.plot(cancer["Time"].tail(30), cancer[input_name].tail(30))
+    data_tailed_rolling = data_tailed.append(append_data, sort=False)
+
+    # canvas.plot(cancer["Time"].tail(30), cancer[input_name].tail(30))
     linreg = LinearRegression()
     x = np.c_[
         data_tailed_rolling["Time"].values.reshape(-1, 1),
@@ -52,13 +34,14 @@ def PredictWindow(canvas, input_name, raw_data):
     model = linreg.fit(x, y)
     intercept = model.intercept_
     coef = model.coef_
-    print(intercept, coef)
+    #print(intercept, coef)
 
     xs = np.arange(
         data_tailed.iloc[0, 0],
         data_tailed.iloc[-1, 0] + PREDICTED_RANGE,
         1,
     )
+
     ys = (
         xs * model.coef_[0, 0]
         + (xs ** 2) * model.coef_[0, 1]
@@ -72,20 +55,27 @@ def PredictWindow(canvas, input_name, raw_data):
         / np.mean(ys)
         * np.sqrt(1 / n + (ys - np.mean(ys)) ** 2 / np.sum((ys - np.mean(ys)) ** 2))
     )
-    print(np.mean(ys))
+
+    xs_s = xs[-PREDICTED_RANGE:]
+    ys_s = ys[-PREDICTED_RANGE:]
+    ys_ci_s = ys_ci[-PREDICTED_RANGE:]
+
+    #print(np.mean(ys))
     for i in range(0, PREDICTED_RANGE):
         ys_ci[-PREDICTED_RANGE + i] *= (1 + i)
-    print(ys_ci[-5:-1])
-    a1.scatter(x="Time", y=input_name, color="b", data=data_tailed)
-    a1.plot(xs, ys, lw=1, color="r")
-    a1.fill_between(xs, ys - ys_ci, ys + ys_ci, color="r", alpha=0.1)
-    a1.axvline(x=tail_data["Time"], color="black")
+    #print(ys_ci[-5:-1])
 
-    a1.set_title(f"Raw data versus predicted value, {input_name}")
-    a1.legend(["predicted graph", "latest append date", "raw data", "standard variation < 1"], loc="upper left")
-    a1.set_xlabel("Time(days)")
-    a1.set_ylabel(input_name)
-    a1.grid(True)
+    canvas.scatter(x="Time", y=input_name, color="b", data=data_tailed)
+    canvas.plot(xs, ys, "--r", lw=1)
+    canvas.fill_between(xs_s, ys_s - ys_ci_s, ys_s + ys_ci_s, color="r", alpha=0.1)
+    canvas.axvline(x=tail_data["Time"], color="black", lw=3)
+    canvas.plot(xs_s, ys_s, "c", lw=5)
 
-    return a1
+    canvas.set_title(f"Raw data versus predicted value, {input_name}")
+    canvas.legend(["estimated graph", "date of latest append data", "predicted graph", "raw data", "standard variation < 1"], loc="upper left")
+    canvas.set_xlabel("Time(days)")
+    canvas.set_ylabel(input_name)
+    canvas.grid(True)
+
+    return canvas
 
